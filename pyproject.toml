@@ -1,0 +1,15 @@
+[tool.pdm]
+
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Vijay Gaikwad", email = "vijaygkd@gmail.com"},
+]
+dependencies = [
+    "torch>=1.13.1",
+    "numpy>=1.24.2",
+]
+requires-python = ">=3.9"
+license = {text = "MIT"}
