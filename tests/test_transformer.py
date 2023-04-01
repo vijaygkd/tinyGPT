@@ -1,5 +1,5 @@
 import torch
-from transformer import MultiHeadAttention, PositionWiseFeedForward
+from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm, Encoder
 
 def test_MultiHeadAttention():
     d_model = 64
@@ -32,3 +32,33 @@ def test_PositionWiseFeedForward():
     output = pwff(x)
 
     assert output.shape == (batch_size, seq_len, d_model), f"Expected output shape: {(batch_size, seq_len, d_model)}, got: {output.shape}"
+
+def test_ResidualLayerNorm():
+    p_drop = 0.1
+    seq_len = 10
+    batch_size = 4
+    d_model = 64
+    input = torch.randn(batch_size, seq_len, d_model)
+    output = torch.randn(batch_size, seq_len, d_model)
+
+    rln = ResidualLayerNorm(d_model, p_drop)
+    layernorm_output = rln(input, output)
+
+    assert layernorm_output.shape == (batch_size, seq_len, d_model), f"Expected output shape: {(batch_size, seq_len, d_model)}, got: {layernorm_output.shape}"
+
+def test_Encoder():
+    d_model = 64
+    d_ff = 128
+    n_heads = 8
+    p_drop = 0.1
+    seq_len = 10
+    batch_size = 4
+    x = torch.randn(batch_size, seq_len, d_model)
+    mask = torch.zeros(batch_size, n_heads, seq_len, seq_len).bool()
+    mask[0, 0, 0, 1] = 1
+
+    encoder = Encoder(d_model, d_ff, n_heads, p_drop)
+    ff_out, attn_scores = encoder(x, mask)
+
+    assert ff_out.shape == (batch_size, seq_len, d_model), f"Expected output shape: {(batch_size, seq_len, d_model)}, got: {ff_out.shape}"
+    assert attn_scores[0, 0, 0, 1] == 0, f"Expected masked value to be 0, got: {attn_scores[0, 0, 0, 1]}"

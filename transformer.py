@@ -62,9 +62,9 @@ class PositionWiseFeedForward(nn.Module):
 
 
 class ResidualLayerNorm(nn.Module):
-    def __init__(self, p_drop):
+    def __init__(self, d_model, p_drop):
         super().__init__()
-        self.layer_norm = nn.LayerNorm()
+        self.layer_norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(p_drop)
 
     def forward(self, input, output):
@@ -76,11 +76,20 @@ class ResidualLayerNorm(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, d_model, d_ff, n_heads):
+    def __init__(self, d_model, d_ff, n_heads, p_drop):
         super().__init__()
-
-
-
+        self.mha = MultiHeadAttention(d_model, n_heads)
+        self.ln_attn = ResidualLayerNorm(d_model, p_drop)
+        self.ff = PositionWiseFeedForward(d_model, d_ff)
+        self.ln_ff = ResidualLayerNorm(d_model, p_drop)
+        
+    def forward(self, x, mask=None):
+        # x: (batch, seq_len, d_model)
+        attn_out, attn_scores = self.mha(x, mask)
+        attn_out = self.ln_attn(x, attn_out)
+        ff_out = self.ff(attn_out)
+        ff_out = self.ln_ff(attn_out, ff_out)
+        return ff_out, attn_scores
 
 
 # class Decoder(nn.Module):
