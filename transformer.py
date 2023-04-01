@@ -44,8 +44,23 @@ class MultiHeadAttention(nn.Module):
         return output, attn_scores
 
 
-# class PositionWiseFeedForward(nn.Module):
-#     raise NotImplementedError
+class PositionWiseFeedForward(nn.Module):
+    def __init__(self, d_model, d_ff):
+        super().__init__()
+        self.d_model = d_model
+        self.d_ff = d_ff
+        self.proj_ff = nn.Linear(d_model, d_ff)
+        self.proj_out = nn.Linear(d_ff, d_model)
+        self.activation = nn.functional.relu
+
+    def forward(self, x):
+        # x: (batch, seq_len, d_model)
+        x_ff = self.proj_ff(x)          # (batch, seq_len, d_ff)
+        x_ff = self.activation(x_ff)
+        output = self.proj_out(x_ff)    # (batch, seq_len, d_model)
+        return output
+
+
 
 # class Encoder(nn.Module):
 #     raise NotImplementedError

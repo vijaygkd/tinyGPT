@@ -1,5 +1,5 @@
 import torch
-from transformer import MultiHeadAttention
+from transformer import MultiHeadAttention, PositionWiseFeedForward
 
 def test_MultiHeadAttention():
     d_model = 64
@@ -20,5 +20,15 @@ def test_MultiHeadAttention():
     output, attn_scores = mha(x, mask)
     assert attn_scores[0, 0, 0, 1] == 0, f"Expected masked value to be 0, got: {attn_scores[0, 0, 0, 1]}"
 
-if __name__ == '__main__':
-    test_MultiHeadAttention()
+
+def test_PositionWiseFeedForward():
+    d_model = 64
+    d_ff = 128
+    seq_len = 10
+    batch_size = 4
+    x = torch.randn(batch_size, seq_len, d_model)
+
+    pwff = PositionWiseFeedForward(d_model, d_ff)
+    output = pwff(x)
+
+    assert output.shape == (batch_size, seq_len, d_model), f"Expected output shape: {(batch_size, seq_len, d_model)}, got: {output.shape}"
