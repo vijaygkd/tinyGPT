@@ -61,9 +61,21 @@ class PositionWiseFeedForward(nn.Module):
         return output
 
 
+class ResidualLayerNorm(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.layer_norm = nn.LayerNorm()
 
-# class Encoder(nn.Module):
-#     raise NotImplementedError
+    def forward(self, input, output):
+        # x: (batch, seq_len, d_model)
+        residual_output = input + output
+        layernorm_output = self.layer_norm(residual_output)
+        return layernorm_output
+
+
+class Encoder(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 # class Decoder(nn.Module):
