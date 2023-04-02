@@ -1,7 +1,7 @@
 import torch
 import unittest
 from torch import nn
-from GPT import GPT, Decoder
+from GPT import GPT, GPTDecoder
 
 
 class TestGPT(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestGPT(unittest.TestCase):
         self.assertEqual(len(decoder_attns), self.n_blocks)
 
     def test_decoder_output_shape(self):
-        decoder = Decoder(self.d_model, self.d_ff, self.n_heads, self.p_drop)
+        decoder = GPTDecoder(self.d_model, self.d_ff, self.n_heads, self.p_drop)
         x = torch.zeros((self.batch_size, self.seq_len, self.d_model), dtype=torch.float)
         output, attn_scores = decoder(x)
 

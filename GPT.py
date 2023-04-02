@@ -12,7 +12,7 @@ class GPT(nn.Module):
         super().__init__()
         self.decoder_stack =  []
         for i in range(n_blocks):
-            decoder = Decoder(d_model, d_ff, n_heads, p_drop)
+            decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop)
             self.decoder_stack.append(decoder)
         self.proj_output = nn.Linear(d_model, vocab_size)
         # embeddings
@@ -40,7 +40,7 @@ class GPT(nn.Module):
         return logits, decoder_attns
 
 
-class Decoder(nn.Module):
+class GPTDecoder(nn.Module):
     def __init__(self, d_model, d_ff, n_heads, p_drop):
         super().__init__()
         self.mha = MultiHeadAttention(d_model, n_heads)
