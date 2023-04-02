@@ -3,6 +3,7 @@ GPT-2 implementation using PyTorch
 
 
 # Tasks
+## Model
 A. Transformer architecture
 0. Build Attention components
     - Scaled dot-product attention
@@ -17,3 +18,9 @@ A. Transformer architecture
 3. Build Decoder
     - Decoder stack
     - Softmax output
+
+## Data
+1. Data Loader class
+2. Masking
+    - padding mask
+    - subsequent mask
