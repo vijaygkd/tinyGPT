@@ -1,7 +1,7 @@
 """
 GPT model definition
 """
-
+import math
 import torch
 from torch import nn
 from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm
@@ -10,6 +10,7 @@ from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLay
 class GPT(nn.Module):
     def __init__(self, n_blocks, d_model, d_ff, n_heads, p_drop, vocab_size, seq_len):
         super().__init__()
+        self.d_model = d_model
         self.decoder_stack =  []
         for i in range(n_blocks):
             decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop)
@@ -27,6 +28,7 @@ class GPT(nn.Module):
         # x: (batch, seq_len)
         decoder_attns = []
         token_emb = self.token_embedding(x)                         # (batch, seq_len, d_model)
+        token_emb = token_emb * math.sqrt(self.d_model)
         pos_embd = self.positional_embedding(self.position_ids)     # (batch, seq_len, d_model)
         input_emb = token_emb + pos_embd                            # (batch, seq_len, d_model)
         input_emb = self.emb_dropout(input_emb)
