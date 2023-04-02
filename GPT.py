@@ -20,6 +20,8 @@ class GPT(nn.Module):
         # TODO - positional embedding logic
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
         self.position_ids = torch.arange(seq_len)   # position ids: [0,1,2...,n]
+        self.emb_dropout = nn.Dropout(p_drop)
+
 
     def forward(self, x, mask):
         # x: (batch, seq_len)
@@ -27,6 +29,7 @@ class GPT(nn.Module):
         token_emb = self.token_embedding(x)                         # (batch, seq_len, d_model)
         pos_embd = self.positional_embedding(self.position_ids)     # (batch, seq_len, d_model)
         input_emb = token_emb + pos_embd                            # (batch, seq_len, d_model)
+        input_emb = self.emb_dropout(input_emb)
         # decoder stack
         dec_out = input_emb
         for decoder in self.decoder_stack:

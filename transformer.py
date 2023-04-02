@@ -7,6 +7,10 @@ from torch import nn
 
 
 class MultiHeadAttention(nn.Module):
+    """
+    Multi-head Self attention
+    """
+    # TODO - also allow cross attention
     def __init__(self, d_model, n_heads):
         super().__init__()
         self.d_model = d_model
@@ -74,6 +78,7 @@ class ResidualLayerNorm(nn.Module):
         layernorm_output = self.layer_norm(residual_output)
         return layernorm_output
 
+# -------------------------------------------------------------- #
 
 class Encoder(nn.Module):
     def __init__(self, d_model, d_ff, n_heads, p_drop):
