@@ -93,6 +93,19 @@ class Encoder(nn.Module):
 
 
 # class Decoder(nn.Module):
-#     raise NotImplementedError
- 
+#     def __init__(self, d_model, d_ff, n_heads, p_drop):
+#         super().__init__()
+#         self.self_mha = MultiHeadAttention(d_model, n_heads)
+#         self.ln_self_attn = ResidualLayerNorm(d_model, p_drop)
+#         self.x_mha = MultiHeadAttention(d_model, n_heads)
+#         self.ln_x_attn = ResidualLayerNorm(d_model, p_drop)
+#         self.ff = PositionWiseFeedForward(d_model, d_ff)
+#         self.ln_ff = ResidualLayerNorm(d_model, p_drop)
 
+#     def forward(self, x, encoder_output):
+#         # x: (batch, seq_len, d_model)
+#         # encoder_output: (batch, seq_len, d_model)
+
+
+
+ 
