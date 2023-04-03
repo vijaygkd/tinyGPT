@@ -24,8 +24,8 @@ class GPT(nn.Module):
         self.emb_dropout = nn.Dropout(p_drop)
         self.mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False))
 
-
-    def forward(self, x, mask):
+    # TODO - implement padding mask and combine it with training mask
+    def forward(self, x, mask=None):
         # x: (batch, seq_len)
         decoder_attns = []
         token_emb = self.token_embedding(x)                         # (batch, seq_len, d_model)
