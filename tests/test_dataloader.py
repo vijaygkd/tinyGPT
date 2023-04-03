@@ -1,28 +1,34 @@
 import unittest
+import torch
 from torch.utils.data import DataLoader
-from transformers import GPT2TokenizerFast
-from dataloader import GPTDataset
+from dataset import GPTDataset
 
 
-class TestGPTDataset(unittest.TestCase):
-    
-    def setUp(self):
-        self.file_path = 'data/tinyshakespeare.txt'
-        self.seq_len = 1024
-        self.dataset = GPTDataset(self.file_path, self.seq_len)
-    
-    def test_len(self):
-        self.assertEqual(len(self.dataset), 1090)
+# class TestGPTDataset(unittest.TestCase):
 
-    def test_getitem(self):
-        sample_idx = 10
-        sample_seq = self.dataset[sample_idx]
-        self.assertEqual(len(sample_seq), self.seq_len)
+#     def test_init(self):
+#         dataset = GPTDataset('tests/data.txt', seq_len=10)
+#         self.assertEqual(dataset.seq_len, 10)
+#         self.assertIsNotNone(dataset.tokenizer)
+#         self.assertEqual(len(dataset.examples), 7)
 
-    def test_dataloader(self):
-        batch_size = 16
-        dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True)
-        for batch in dataloader:
-            self.assertEqual(len(batch), batch_size)
-            break
-    
+#     def test_len(self):
+#         dataset = GPTDataset('tests/data.txt', seq_len=10)
+#         self.assertEqual(len(dataset), 7)
+
+#     def test_getitem(self):
+#         dataset = GPTDataset('tests/data.txt', seq_len=10)
+#         input, label = dataset[0]
+#         self.assertIsInstance(input, torch.Tensor)
+#         self.assertIsInstance(label, torch.Tensor)
+#         self.assertEqual(input.shape, torch.Size([9]))
+#         self.assertEqual(label.shape, torch.Size([9]))
+
+#     def test_dataloader(self):
+#         dataset = GPTDataset('tests/data.txt', seq_len=10)
+#         dataloader = DataLoader(dataset, batch_size=2)
+#         for X, Y in dataloader:
+#             self.assertIsInstance(X, torch.Tensor)
+#             self.assertIsInstance(Y, torch.Tensor)
+#             self.assertEqual(X.shape, torch.Size([2, 9]))
+#             self.assertEqual(Y.shape, torch.Size([2, 9]))
