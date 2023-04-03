@@ -35,7 +35,7 @@ class MultiHeadAttention(nn.Module):
         # Scaled Dot-product attention: (batch, n_heads, seq_len, seq_len)
         attn_scores = torch.matmul(Q, K.transpose(2,3)) / math.sqrt(self.d_k)
         # masking - mask positions to fill have value 1. Fill it with large negative number
-        if mask is not None:
+        if mask is not None: # mask: (batch, seq_len, seq_len)
             attn_scores = torch.masked_fill(attn_scores, mask, value=float('-inf'))
         # softmax
         attn_scores = torch.softmax(attn_scores, dim=-1)
