@@ -1,5 +1,5 @@
 import torch
-from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm, Encoder
+from tinytransformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm, Encoder
 
 def test_MultiHeadAttention():
     d_model = 64

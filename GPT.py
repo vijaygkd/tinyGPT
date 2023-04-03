@@ -4,7 +4,7 @@ GPT model definition
 import math
 import torch
 from torch import nn
-from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm
+from tinytransformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm
 
 
 class GPT(nn.Module):
