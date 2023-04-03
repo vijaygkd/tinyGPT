@@ -34,9 +34,9 @@ class MultiHeadAttention(nn.Module):
         V = self.proj_v(x).view(batch_size, seq_len, self.n_heads, -1).transpose(1, 2)
         # Scaled Dot-product attention: (batch, n_heads, seq_len, seq_len)
         attn_scores = torch.matmul(Q, K.transpose(2,3)) / math.sqrt(self.d_k)
-        # masking - mask positions to fill have value 1. Fill it with large negative number
+        # masking - mask positions to fill have value 0. Fill it with large negative number
         if mask is not None: # mask: (batch, seq_len, seq_len)
-            attn_scores = torch.masked_fill(attn_scores, mask, value=float('-inf'))
+            attn_scores = torch.masked_fill(attn_scores, mask==0, value=float('-inf'))
         # softmax
         attn_scores = torch.softmax(attn_scores, dim=-1)
         # attention output: (batch, n_heads, seq_len, d_k)
