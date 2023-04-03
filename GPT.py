@@ -12,10 +12,13 @@ class GPT(nn.Module):
         super().__init__()
         
         self.d_model = d_model
-        self.decoder_stack =  []
+        # decoder stack
+        decoder_blocks =  []
         for i in range(n_blocks):
             decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop, device)
-            self.decoder_stack.append(decoder)
+            decoder_blocks.append(decoder)
+        self.decoder_stack = nn.ModuleList(decoder_blocks)
+
         self.proj_output = nn.Linear(d_model, vocab_size)
         # embeddings
         self.token_embedding = nn.Embedding(vocab_size, d_model)

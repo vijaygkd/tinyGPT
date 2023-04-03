@@ -7,6 +7,7 @@ from torch import nn
 from GPT import GPT
 from dataset import GPTDataset, pad_seq_fn
 from torch.utils.data import Dataset, DataLoader
+from torchinfo import summary
 
 
 def train():
@@ -15,7 +16,7 @@ def train():
     print(f"Hardware: {device}")
 
     num_epochs = 1
-    batch_size = 64
+    batch_size = 32
     seq_len = 128
 
     # dataset
@@ -27,7 +28,7 @@ def train():
 
     # model
     gpt = GPT(
-        n_blocks=2,
+        n_blocks=4,
         d_model=512,
         d_ff=512*4,
         n_heads=8,
@@ -42,8 +43,7 @@ def train():
     # Define the optimizer
     optimizer = torch.optim.AdamW(gpt.parameters())  #optim.SGD(model.parameters(), lr=0.01) 
 
-    print(gpt)
-    print(f"Number of parameters: {sum(p.numel() for p in gpt.parameters())}")
+    summary(gpt, (batch_size, seq_len), dtypes=[torch.long], depth=3, device=device)
     print("Starting training.")
     # train
     for epoch in range(num_epochs):
