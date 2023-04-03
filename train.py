@@ -15,7 +15,7 @@ def train():
     # device = 'cpu'
     print(f"Hardware: {device}")
 
-    num_epochs = 1
+    num_epochs = 2
     batch_size = 32
     seq_len = 128
 
