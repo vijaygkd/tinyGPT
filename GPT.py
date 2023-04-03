@@ -8,21 +8,24 @@ from tinytransformer import MultiHeadAttention, PositionWiseFeedForward, Residua
 
 
 class GPT(nn.Module):
-    def __init__(self, n_blocks, d_model, d_ff, n_heads, p_drop, vocab_size, seq_len):
+    def __init__(self, n_blocks, d_model, d_ff, n_heads, p_drop, vocab_size, seq_len, device='cpu'):
         super().__init__()
+        
         self.d_model = d_model
         self.decoder_stack =  []
         for i in range(n_blocks):
-            decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop)
+            decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop, device)
             self.decoder_stack.append(decoder)
         self.proj_output = nn.Linear(d_model, vocab_size)
         # embeddings
         self.token_embedding = nn.Embedding(vocab_size, d_model)
         # TODO - positional embedding logic
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
-        self.position_ids = torch.arange(seq_len)   # position ids: [0,1,2...,n]
+        self.position_ids = torch.arange(seq_len).to(device)   # position ids: [0,1,2...,n]
         self.emb_dropout = nn.Dropout(p_drop)
-        self.mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False))
+        self.mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False).to(device))
+        self.to(device)
+        
 
     # TODO - implement padding mask and combine it with training mask
     def forward(self, x, mask=None):
@@ -44,12 +47,12 @@ class GPT(nn.Module):
 
 
 class GPTDecoder(nn.Module):
-    def __init__(self, d_model, d_ff, n_heads, p_drop):
+    def __init__(self, d_model, d_ff, n_heads, p_drop, device='cpu'):
         super().__init__()
-        self.mha = MultiHeadAttention(d_model, n_heads)
-        self.ln_attn = ResidualLayerNorm(d_model, p_drop)
-        self.ff = PositionWiseFeedForward(d_model, d_ff)
-        self.ln_ff = ResidualLayerNorm(d_model, p_drop)
+        self.mha = MultiHeadAttention(d_model, n_heads).to(device)
+        self.ln_attn = ResidualLayerNorm(d_model, p_drop).to(device)
+        self.ff = PositionWiseFeedForward(d_model, d_ff).to(device)
+        self.ln_ff = ResidualLayerNorm(d_model, p_drop).to(device)
 
     def forward(self, x, mask=None):
         # x: (batch, seq_len, d_model)

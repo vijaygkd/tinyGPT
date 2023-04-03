@@ -10,6 +10,10 @@ from torch.utils.data import Dataset, DataLoader
 
 
 def train():
+    device = torch.device('mps' if torch.has_mps else 'cpu')
+    # device = 'cpu'
+    print(f"Hardware: {device}")
+
     num_epochs = 1
     batch_size = 64
     seq_len = 128
@@ -29,7 +33,8 @@ def train():
         n_heads=8,
         p_drop=0.1,
         vocab_size=vocab_size,
-        seq_len=seq_len
+        seq_len=seq_len,
+        device=device
     )
 
     # Define the loss function
@@ -47,6 +52,7 @@ def train():
         running_loss = 0.0
         for i, data in enumerate(tqdm(dataloader, desc=f'Epoch {epoch}', unit='batch')):
             X, Y = data
+            X, Y = X.to(device), Y.to(device)
             # Zero the gradients
             optimizer.zero_grad()
 
