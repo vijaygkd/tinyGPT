@@ -1,5 +1,5 @@
 import torch
-from transformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm, Encoder
+from tinytransformer import MultiHeadAttention, PositionWiseFeedForward, ResidualLayerNorm, Encoder
 
 def test_MultiHeadAttention():
     d_model = 64
@@ -7,7 +7,7 @@ def test_MultiHeadAttention():
     seq_len = 10
     batch_size = 4
     x = torch.randn(batch_size, seq_len, d_model)
-    mask = torch.zeros(batch_size, n_heads, seq_len, seq_len).bool()
+    mask = torch.ones(batch_size, n_heads, seq_len, seq_len).bool()
 
     mha = MultiHeadAttention(d_model, n_heads)
     output, attn_scores = mha(x, mask)
@@ -16,9 +16,16 @@ def test_MultiHeadAttention():
     assert attn_scores.shape == (batch_size, n_heads, seq_len, seq_len), f"Expected attn_scores shape: {(batch_size, n_heads, seq_len, seq_len)}, got: {attn_scores.shape}"
 
     # Test with mask
-    mask[0, 0, 0, 1] = 1
+    mask[0, 0, 0, 1] = 0
     output, attn_scores = mha(x, mask)
     assert attn_scores[0, 0, 0, 1] == 0, f"Expected masked value to be 0, got: {attn_scores[0, 0, 0, 1]}"
+
+    # Test subsequent mask for teacher training
+    mask = torch.tril(torch.ones(seq_len, seq_len))
+    output, attn_scores = mha(x, mask)
+    # check if all elements are 0 after zero-ing out lower and diagonal elements
+    bottom_zero_out = torch.triu(torch.ones((seq_len, seq_len)), diagonal=1)
+    assert (attn_scores * bottom_zero_out).sum() == 0
 
 
 def test_PositionWiseFeedForward():
@@ -54,8 +61,8 @@ def test_Encoder():
     seq_len = 10
     batch_size = 4
     x = torch.randn(batch_size, seq_len, d_model)
-    mask = torch.zeros(batch_size, n_heads, seq_len, seq_len).bool()
-    mask[0, 0, 0, 1] = 1
+    mask = torch.ones(batch_size, n_heads, seq_len, seq_len)
+    mask[0, 0, 0, 1] = 0
 
     encoder = Encoder(d_model, d_ff, n_heads, p_drop)
     ff_out, attn_scores = encoder(x, mask)
