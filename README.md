@@ -24,3 +24,8 @@ A. Transformer architecture
 2. Masking
     - padding mask
     - subsequent mask
+
+
+# Refs
+https://rowlando13.medium.com/everything-gpt-2-4-data-preparation-514cb62f9f3b
+
