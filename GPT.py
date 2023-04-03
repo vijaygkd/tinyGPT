@@ -22,6 +22,7 @@ class GPT(nn.Module):
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
         self.position_ids = torch.arange(seq_len)   # position ids: [0,1,2...,n]
         self.emb_dropout = nn.Dropout(p_drop)
+        self.mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False))
 
 
     def forward(self, x, mask):
@@ -35,7 +36,7 @@ class GPT(nn.Module):
         # decoder stack
         dec_out = input_emb
         for decoder in self.decoder_stack:
-            dec_out, attn = decoder(dec_out, mask)  # (batch, seq_len, d_model)
+            dec_out, attn = decoder(dec_out, self.mask)  # (batch, seq_len, d_model)
             decoder_attns.append(attn)              # (batch, n_heads, seq_len, seq_len)
         # output
         logits = self.proj_output(dec_out)          # (batch, seq_len, vocab_size)
