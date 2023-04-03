@@ -1,0 +1,6 @@
+This is a test file for the GPTDataset class.
+It contains multiple lines of text to be tokenized and split into sequences.
+
+The dataset class uses the GPT2TokenizerFast for encoding the text.
+
+The DataLoader will handle batching and collation of examples.
