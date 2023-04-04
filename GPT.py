@@ -10,8 +10,8 @@ from tinytransformer import MultiHeadAttention, PositionWiseFeedForward, Residua
 class GPT(nn.Module):
     def __init__(self, n_blocks, d_model, d_ff, n_heads, p_drop, vocab_size, seq_len, device='cpu'):
         super().__init__()
-        
         self.d_model = d_model
+        self.seq_len = seq_len
         # decoder stack
         decoder_blocks =  []
         for i in range(n_blocks):
