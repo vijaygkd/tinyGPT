@@ -80,7 +80,9 @@ def train():
         # Print the loss for this epoch
         print("Epoch [{}/{}], Loss: {:.4f}".format(epoch+1, num_epochs, loss.item()))
 
-
+    # save model
+    torch.save(gpt.state_dict(), 'model/tinygpt.pt')
+    
 
 if __name__ == '__main__':
     train()
