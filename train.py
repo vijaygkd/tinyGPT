@@ -11,13 +11,23 @@ from torchinfo import summary
 
 
 def train():
+    # ---------------------- #
+    # MODEL PARAMETERS #
+    n_blocks = 2
+    d_model = 768
+    d_ff = d_model * 4
+    n_heads = 8
+    p_drop = 0.1
+
+    # TRAINING PARAMETERS #
+    num_epochs = 1
+    batch_size = 64
+    seq_len = 128
+    # ---------------------- #
+
     device = torch.device('mps' if torch.has_mps else 'cpu')
     # device = 'cpu'
     print(f"Hardware: {device}")
-
-    num_epochs = 2
-    batch_size = 32
-    seq_len = 128
 
     # dataset
     dataset = GPTDataset('data/tinyshakespeare.txt', seq_len=seq_len)
@@ -28,11 +38,11 @@ def train():
 
     # model
     gpt = GPT(
-        n_blocks=4,
-        d_model=512,
-        d_ff=512*4,
-        n_heads=8,
-        p_drop=0.1,
+        n_blocks=n_blocks,
+        d_model=d_model,
+        d_ff=d_ff,
+        n_heads=n_heads,
+        p_drop=p_drop,
         vocab_size=vocab_size,
         seq_len=seq_len,
         device=device
@@ -82,7 +92,7 @@ def train():
 
     # save model
     torch.save(gpt.state_dict(), 'model/tinygpt.pt')
-    
+
 
 if __name__ == '__main__':
     train()
