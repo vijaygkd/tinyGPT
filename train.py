@@ -13,26 +13,28 @@ from torchinfo import summary
 def train():
     # ---------------------- #
     # MODEL PARAMETERS #
-    n_blocks = 2
-    d_model = 768
+    n_blocks = 4
+    d_model = 512
     d_ff = d_model * 4
     n_heads = 8
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
-    num_epochs = 1000
-    batch_size = 8
-    seq_len = 16
-    lr=0.01
+    num_epochs = 10
+    batch_size = 32
+    seq_len = 50
+    lr=0.001    # default=0.001
     model_path = 'model/tinygpt.pt'
-    # ---------------------- #
+    data_path = 'data/tinyshakespeare.txt'
+
+    # ---------------------------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
     # device = 'cpu'
     print(f"Hardware: {device}")
 
     # dataset
-    dataset = GPTDataset('data/rogerfederer.txt', seq_len=seq_len)
+    dataset = GPTDataset(data_path, seq_len=seq_len)
     vocab_size = dataset.tokenizer.vocab_size
     dataloader = DataLoader(dataset, batch_size, shuffle=True, collate_fn=pad_seq_fn)
     print(f"Dataset token size: {len(dataset)}")
@@ -90,7 +92,7 @@ def train():
             # print statistics
             running_loss += loss.item()
             if i % 10 == 9:    # print every 10 mini-batches
-                print(f'Epoch {epoch}, batch {i+1}: loss = {running_loss / 10:.4f}')
+                # print(f'Epoch {epoch}, batch {i+1}: loss = {running_loss / 10:.4f}')
                 running_loss = 0.0
 
         # Print the loss for this epoch
