@@ -6,6 +6,7 @@ from transformers import GPT2TokenizerFast
 from GPT import GPT
 
 # TODO - slidding window text generation
+# TODO impelemnt nucleus decoding - top_p
 def generate_text(model, context=" ", max_len=100, device='cpu'):
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
@@ -23,18 +24,26 @@ def generate_text(model, context=" ", max_len=100, device='cpu'):
         input = context_tokens['input_ids']
         attn_mask = context_tokens['attention_mask']
         # next token prediction
-        logits, attn = model(input)                             # logit: (1, seq_len, vocab)            
-        # TODO impelemnt nucleus decoding - top_p
-        # greedy decoding
-        pred_tokens = torch.argmax(logits, dim=-1).squeeze()    # (1, seq_len) 
-        # index of last word before padding
-        next_token_idx = attn_mask.to(torch.int32).sum() - 1                      
-        next_token = pred_tokens[next_token_idx]
-
+        logits, attn = model(input)                             # logit: (1, seq_len, vocab)
+        next_token_idx = attn_mask.to(torch.int32).sum() - 1  
+        # sample token
+        next_token = greedy_decode(logits, next_token_idx)
         pred_word = tokenizer.decode(next_token)
         show(pred_word, color=True)
         # auto-regressive generation
         context += pred_word
+
+        # TODO - allow moving window
+        if next_token_idx == model.seq_len-1:
+            break
+
+def greedy_decode(logits, lastest_token_idx):
+    # greedy decoding -> leads to repeatition
+    pred_tokens = torch.argmax(logits, dim=-1).squeeze()    # (1, seq_len) 
+    # index of last word before padding                        
+    next_token = pred_tokens[lastest_token_idx]
+    return next_token
+
 
 def show(text, color=False):
     c = e = ''
@@ -45,8 +54,6 @@ def show(text, color=False):
     
 
 if __name__ == '__main__':
-    context = """
-Second Citizen:
-One word, good"""
+    context = """Roger is"""
     gpt = torch.load('model/tinygpt.pt')
     generate_text(gpt, context, device='mps')
