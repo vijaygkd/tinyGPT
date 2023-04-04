@@ -26,8 +26,10 @@ def generate_text(model, context=" ", max_len=100, device='cpu'):
         # next token prediction
         logits, attn = model(input)                             # logit: (1, seq_len, vocab)
         next_token_idx = attn_mask.to(torch.int32).sum() - 1  
+        logits = logits.squeeze()                               # (seq_len, vocab)
+        token_logits = logits[next_token_idx]                # (vocab)
         # sample token
-        next_token = greedy_decode(logits, next_token_idx)
+        next_token = nucleus_sampling(token_logits, top_p=0.9, temperature=0.3)
         pred_word = tokenizer.decode(next_token)
         show(pred_word, color=True)
         # auto-regressive generation
@@ -37,12 +39,41 @@ def generate_text(model, context=" ", max_len=100, device='cpu'):
         if next_token_idx == model.seq_len-1:
             break
 
-def greedy_decode(logits, lastest_token_idx):
-    # greedy decoding -> leads to repeatition
-    pred_tokens = torch.argmax(logits, dim=-1).squeeze()    # (1, seq_len) 
-    # index of last word before padding                        
-    next_token = pred_tokens[lastest_token_idx]
-    return next_token
+
+def nucleus_sampling(logits, top_p=0.9, temperature=1):
+    # logits: (vocab)
+    temp_logits = logits / temperature
+    probs = torch.softmax(temp_logits, dim=-1)  # (vocab)
+    token = top_p_sampling(probs, top_p)
+    return token
+
+
+def top_p_sampling(probabilities, top_p=0.9):
+    # Sort the probabilities in descending order
+    sorted_probs, sorted_indices = torch.sort(probabilities, descending=True)
+    # Compute the cumulative probabilities
+    cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+    # Find the indices to keep
+    keep_indices = (cumulative_probs <= top_p).nonzero()
+    # Select the top-p probabilities and indices
+    top_p_probs = sorted_probs[keep_indices].squeeze()
+    top_p_indices = sorted_indices[keep_indices].squeeze()
+    # Create a mask to zero-out all other probabilities
+    mask = torch.zeros_like(probabilities).scatter(1, top_p_indices.unsqueeze(1), 1.0)
+    # Apply the mask to the probabilities
+    masked_probs = mask * probabilities
+    # Normalize the probabilities
+    normalized_probs = masked_probs / masked_probs.sum(dim=-1, keepdim=True)
+    # Sample from the normalized probabilities
+    samples = torch.multinomial(normalized_probs, num_samples=1)
+    return samples.squeeze()
+
+
+
+def greedy_sampling(logits):
+    # greedy sampling -> leads to repeatition
+    pred_token = torch.argmax(logits, dim=-1)    # (seq_len) 
+    return pred_token
 
 
 def show(text, color=False):
@@ -54,6 +85,6 @@ def show(text, color=False):
     
 
 if __name__ == '__main__':
-    context = """Roger is"""
+    context = """God is"""
     gpt = torch.load('model/tinygpt.pt')
     generate_text(gpt, context, device='mps')
