@@ -18,15 +18,16 @@ class GPT(nn.Module):
             decoder = GPTDecoder(d_model, d_ff, n_heads, p_drop, device)
             decoder_blocks.append(decoder)
         self.decoder_stack = nn.ModuleList(decoder_blocks)
-
-        self.proj_output = nn.Linear(d_model, vocab_size)
         # embeddings
         self.token_embedding = nn.Embedding(vocab_size, d_model)
         # TODO - positional embedding logic
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
-        self.position_ids = torch.arange(seq_len).to(device)   # position ids: [0,1,2...,n]
+        self.position_ids = torch.arange(seq_len, requires_grad=False).to(device)   # position ids: [0,1,2...,n]
         self.emb_dropout = nn.Dropout(p_drop)
-        self.mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False).to(device))
+        # decoder output - share weight with token embedding
+        self.proj_output = nn.Linear(d_model, vocab_size)
+        # future mask
+        self.future_mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False).to(device))
         self.to(device)
         
 
@@ -42,7 +43,7 @@ class GPT(nn.Module):
         # decoder stack
         dec_out = input_emb
         for decoder in self.decoder_stack:
-            dec_out, attn = decoder(dec_out, self.mask)  # (batch, seq_len, d_model)
+            dec_out, attn = decoder(dec_out, self.future_mask)  # (batch, seq_len, d_model)
             decoder_attns.append(attn)              # (batch, n_heads, seq_len, seq_len)
         # output
         logits = self.proj_output(dec_out)          # (batch, seq_len, vocab_size)
