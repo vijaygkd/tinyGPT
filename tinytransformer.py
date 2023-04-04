@@ -77,6 +77,27 @@ class ResidualLayerNorm(nn.Module):
         residual_output = input + output
         layernorm_output = self.layer_norm(residual_output)
         return layernorm_output
+    
+
+class SharedEmbeddingLayer(nn.Module):
+    def __init__(self, vocab_size, d_model):
+        super().__init__()
+        self.d_model = d_model
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.output_bias = nn.Parameter(torch.zeros(vocab_size), requires_grad=True)
+
+    def forward(self, x, mode='embedding'):
+        if mode == 'embedding':
+            # (batch, seq)  -> input is Long token_id
+            return self.embedding(x) * math.sqrt(self.d_model)      # scale embedding
+        elif mode == 'linear':
+            # x: (batch, seq_len, d_model) @ (d_model, vocab) + (vocab)
+            linear_output = x @ self.embedding.weight.T + self.output_bias
+            # (batch, seq_len, vocab)
+            return linear_output / math.sqrt(self.d_model)          # re-scale output
+        else:
+            raise ValueError(f"Only 'embedding' and 'linear' are valid modes. Value: {mode}")
+        
 
 # -------------------------------------------------------------- #
 
