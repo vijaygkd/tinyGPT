@@ -130,3 +130,4 @@ dmypy.json
 .pdm.toml
 .vscode/
 model/
+data/
