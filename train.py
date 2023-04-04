@@ -20,9 +20,11 @@ def train():
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
-    num_epochs = 1
-    batch_size = 64
-    seq_len = 128
+    num_epochs = 1000
+    batch_size = 8
+    seq_len = 16
+    lr=0.01
+    model_path = 'model/tinygpt.pt'
     # ---------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
@@ -30,7 +32,7 @@ def train():
     print(f"Hardware: {device}")
 
     # dataset
-    dataset = GPTDataset('data/tinyshakespeare.txt', seq_len=seq_len)
+    dataset = GPTDataset('data/rogerfederer.txt', seq_len=seq_len)
     vocab_size = dataset.tokenizer.vocab_size
     dataloader = DataLoader(dataset, batch_size, shuffle=True, collate_fn=pad_seq_fn)
     print(f"Dataset token size: {len(dataset)}")
@@ -48,10 +50,14 @@ def train():
         device=device
     )
 
+    # load existing
+    if True:
+        gpt = torch.load(model_path)
+
     # Define the loss function
     criterion = nn.CrossEntropyLoss()
     # Define the optimizer
-    optimizer = torch.optim.AdamW(gpt.parameters())  #optim.SGD(model.parameters(), lr=0.01) 
+    optimizer = torch.optim.AdamW(gpt.parameters(), lr=lr)
 
     summary(gpt, (batch_size, seq_len), dtypes=[torch.long], depth=3, device=device)
     print("Starting training.")
@@ -91,7 +97,7 @@ def train():
         print("Epoch [{}/{}], Loss: {:.4f}".format(epoch+1, num_epochs, loss.item()))
 
     # save model
-    torch.save(gpt.state_dict(), 'model/tinygpt.pt')
+    torch.save(gpt, model_path)
 
 
 if __name__ == '__main__':
