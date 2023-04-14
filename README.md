@@ -42,4 +42,5 @@ GPT-2 model sizes! No. of decoder stacks vs no. of parameters
 
 # Refs
 https://rowlando13.medium.com/everything-gpt-2-4-data-preparation-514cb62f9f3b
+https://kikaben.com/transformers-coding-details/
 
