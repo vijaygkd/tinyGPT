@@ -77,6 +77,7 @@ def greedy_sampling(logits):
 
 
 def show(text, color=False):
+    # TODO - bug, text is not printed unless newline is printed
     c = e = ''
     if color:
         c = '\033[36m'
@@ -85,10 +86,10 @@ def show(text, color=False):
     
 
 if __name__ == '__main__':
-    context = """Man is a slave of God. Thee should"""
-    gpt = torch.load('model/tinygpt_ws.pt')
+    context = """import num"""
+    gpt = torch.load('model/tinygpt_codeparrot.pt')
     generate_text(gpt, context, 
-                  top_p=0.95,
+                  top_p=0.9,
                   temperature=1, 
-                  max_len=100,
+                  max_len=128,
                   device='mps')
