@@ -13,7 +13,8 @@ from torchinfo import summary
 def train(model_path, collate_fn, dataset_train, dataset_val=None):
     # ---------------------- #
     # CONSTANTS #
-    vocab_size = 50257
+    vocab_size = 50257      # GPT2 tokenizer vocab size
+
     # MODEL PARAMETERS #
     n_blocks = 4
     d_model = 512
@@ -26,10 +27,6 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
     batch_size = 32
     seq_len = 128
     lr=0.001    # default=0.001
-
-    # model_path = 'model/tinygpt_ws.pt'
-    # data_path = 'data/tinyshakespeare.txt'
-
     # ---------------------------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')

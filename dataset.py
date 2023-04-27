@@ -1,5 +1,5 @@
 """
-Prepare data from training!
+Read a text file and break in into chunks of size seq_len.
 
 TODO:
 3. Masking - Padding mask, subsequent mask. return these along with input and output
