@@ -23,7 +23,7 @@ def get_codeparrot_dataset(seq_len, split="valid"):
 
     # Load the dataset
     if split == "train":
-        ds = load_dataset("huggingface-course/codeparrot-ds-valid", split="train")
+        ds = load_dataset("huggingface-course/codeparrot-ds-train", split="train")
     elif split == "valid":
         ds = load_dataset("huggingface-course/codeparrot-ds-valid", split="validation")
     # Tokenize the dataset
