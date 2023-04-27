@@ -16,17 +16,18 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
     vocab_size = 50257      # GPT2 tokenizer vocab size
 
     # MODEL PARAMETERS #
-    n_blocks = 4
-    d_model = 512
+    # GPT-2 small parameters
+    n_blocks = 12
+    d_model = 768
     d_ff = d_model * 4
-    n_heads = 8
+    n_heads = 12
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
     num_epochs = 1
-    batch_size = 32
+    batch_size = 64
     seq_len = 128
-    lr=0.001    # default=0.001
+    lr=0.001    # default=0.001   # TODO - learning rate scheduler
     # ---------------------------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
@@ -102,6 +103,8 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
                     # Update the tqdm progress bar with the current loss value
                     # pbar.set_postfix(loss=f'{running_loss / 10:.4f}')
                     running_loss = 0.0
+                
+                # TODO - run eval on validation data
 
         # Print the loss for this epoch
         print("Epoch [{}/{}], Loss: {:.4f}".format(epoch+1, num_epochs, loss.item()))
@@ -113,8 +116,8 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
 def train_codeparrot():
     from dataset_hf import get_codeparrot_dataset, prepare_input_labels
     model_path = 'model/tinygpt_codeparrot.pt'
-    dataset_train = get_codeparrot_dataset(seq_len=128, split='valid')
-    # dataset_val = get_codeparrot_dataset(seq_len=128, split='valid')
+    dataset_train = get_codeparrot_dataset(seq_len=128, split='train')
+    # dataset_val = get_codeparrot_dataset(seq_len=128, split='valid')  
     collate_fn = prepare_input_labels
     train(model_path, collate_fn, dataset_train, None)
 
