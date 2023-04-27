@@ -397,7 +397,7 @@ dependencies = [
 [metadata]
 lock_version = "4.2"
 groups = ["default", "dev"]
-content_hash = "sha256:e361e59be1e95421fb71b9ce817362c584258250d859d66a693ed43c251e7cde"
+content_hash = "sha256:9cbfe05c1f8e6c99335ec324c23bba133b39e5aac0054aa52afb6ccf9b2fa774"
 
 [metadata.files]
 "aiohttp 3.8.4" = [
