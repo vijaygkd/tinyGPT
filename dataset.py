@@ -2,7 +2,7 @@
 Prepare data from training!
 
 TODO:
-3. Masking - Padding mask, subsequent mask
+3. Masking - Padding mask, subsequent mask. return these along with input and output
 """
 import torch
 from torch.nn.utils.rnn import pad_sequence
@@ -15,7 +15,7 @@ class GPTDataset(Dataset):
     Read a text file and break in into chunks of size seq_len.
     Returns text encoding using byte-pair encoding as input and label pairs.
     Label is the right shifted input by 1 position to next-token prediction task.
-    Eg. Input: ['I', 'love', 'tennis'] and label: ['love', 'tennis', '.']
+    Eg.Text: "I love tennis!" Input: ['I', 'love', 'tennis'] and label: ['love', 'tennis', '!']
     """
     def __init__(self, file_path, seq_len):
         self.seq_len = seq_len   
@@ -45,8 +45,8 @@ def pad_seq_fn(batch):
     # Pad the examples to the same length
     inputs = [item[0] for item in batch]
     labels = [item[1] for item in batch]
-    inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
-    labels = pad_sequence(labels, batch_first=True, padding_value=0)
+    inputs = pad_sequence(inputs, batch_first=True, padding_value=50256)    # GPT2 tokenizer <eos> as 50256
+    labels = pad_sequence(labels, batch_first=True, padding_value=50256)
     return inputs, labels
 
 
