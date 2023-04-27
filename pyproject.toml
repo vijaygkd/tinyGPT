@@ -18,5 +18,5 @@ dependencies = [
     "torchinfo>=1.7.2",
     "datasets>=2.11.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
