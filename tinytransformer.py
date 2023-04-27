@@ -55,7 +55,7 @@ class PositionWiseFeedForward(nn.Module):
         self.d_ff = d_ff
         self.proj_ff = nn.Linear(d_model, d_ff)
         self.proj_out = nn.Linear(d_ff, d_model)
-        self.activation = nn.functional.relu
+        self.activation = nn.functional.gelu
 
     def forward(self, x):
         # x: (batch, seq_len, d_model)
