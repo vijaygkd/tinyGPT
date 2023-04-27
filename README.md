@@ -40,6 +40,9 @@ A. Transformer architecture
 ![gtp2 model size](https://jalammar.github.io/images/gpt2/gpt2-sizes-hyperparameters-3.png)
 GPT-2 model sizes! No. of decoder stacks vs no. of parameters
 
+![gpt2 parameter size](https://jalammar.github.io/images/gpt2/gpt2-sizes.png)
+GPT-2 model parameter size
+
 # Refs
 [Illustrated GPT-2](https://jalammar.github.io/illustrated-gpt2/)
 
