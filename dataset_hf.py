@@ -38,8 +38,9 @@ def get_codeparrot_dataset(seq_len, split="validation"):
 def prepare_input_labels(batch):
     inputs, labels = [], []
     for item in batch:
-        inputs.append(item.ids[:-1])
-        labels.append(item.ids[1:])
+        ids = torch.tensor(item.ids, dtype=torch.long)
+        inputs.append(ids[:-1])
+        labels.append(ids[1:])
     return inputs, labels
 
 
