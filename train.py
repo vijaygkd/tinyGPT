@@ -17,20 +17,21 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
 
     # MODEL PARAMETERS #
     # GPT-2 small parameters
-    n_blocks = 12
-    d_model = 768
+    n_blocks = 12     #12
+    d_model = 768    #768
     d_ff = d_model * 4
-    n_heads = 12
+    n_heads = 12      #12
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
     num_epochs = 1
-    batch_size = 64
+    batch_size = 32
     seq_len = 128
     lr=0.001    # default=0.001   # TODO - learning rate scheduler
     # ---------------------------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
+    device = torch.device('cuda' if torch.has_cuda else device)
     # device = 'cpu'
     print(f"Hardware: {device}")
 
@@ -58,12 +59,17 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
     if False:
         gpt = torch.load(model_path)
 
+    # print model summary
+    summary(gpt, (batch_size, seq_len), dtypes=[torch.long], depth=3, device=device)
+
+    # torch 2.0 accelerator
+    # gpt = torch.compile(gpt)
+
     # Define the loss function
     criterion = nn.CrossEntropyLoss()
     # Define the optimizer
     optimizer = torch.optim.AdamW(gpt.parameters(), lr=lr)
-
-    summary(gpt, (batch_size, seq_len), dtypes=[torch.long], depth=3, device=device)
+    
     print("Starting training.")
     # train
     for epoch in range(num_epochs):
@@ -116,7 +122,7 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
 def train_codeparrot():
     from dataset_hf import get_codeparrot_dataset, prepare_input_labels
     model_path = 'model/tinygpt_codeparrot.pt'
-    dataset_train = get_codeparrot_dataset(seq_len=128, split='train')
+    dataset_train = get_codeparrot_dataset(seq_len=128, split='valid')
     # dataset_val = get_codeparrot_dataset(seq_len=128, split='valid')  
     collate_fn = prepare_input_labels
     train(model_path, collate_fn, dataset_train, None)
