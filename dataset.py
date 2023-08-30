@@ -67,6 +67,7 @@ class CharTokenizer():
     def __init__(self):
         self.eos_token_id = 127
         self.eos_token = chr(self.eos_token_id)
+        self.vocab_size = 128
 
     def tokenize(self, text):
         tokens = [self.eos_token] + list(text) + [self.eos_token]

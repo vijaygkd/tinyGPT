@@ -11,10 +11,10 @@ from GPT import GPT
 from dataset import GPTDataset, CharTokenizer, pad_seq_fn
 
 
-def train(model_path, collate_fn, dataset_train, dataset_val=None):
+def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     # ---------------------- #
     # CONSTANTS #
-    vocab_size = 50257      # GPT2 tokenizer vocab size
+    vocab_size = tokenizer.vocab_size      # GPT2 tokenizer vocab size or char vocab size
 
     # MODEL PARAMETERS #
     # GPT-2 small parameters
@@ -125,11 +125,12 @@ def train_codeparrot():
 
     print("Training Codeparrot dataset.")
     model_path = 'model/tinygpt_codeparrot.pt'
+    tkz = GPT2TokenizerFast.from_pretrained('gpt2')
     dataset_train = get_codeparrot_dataset(seq_len=128, split='valid')
     # dataset_val = get_codeparrot_dataset(seq_len=128, split='valid')  
     collate_fn = prepare_input_labels
     # train model
-    train(model_path, collate_fn, dataset_train, None)
+    train(model_path, tkz, collate_fn, dataset_train, None)
 
 
 def train_shakespeare():
@@ -143,7 +144,22 @@ def train_shakespeare():
     dataset = GPTDataset(tkz, data_path, seq_len=128)
     collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
     # train model
-    train(model_path, collate_fn, dataset)
+    train(model_path, tkz, collate_fn, dataset)
+
+
+def train_shakespeare_char():
+    from dataset import GPTDataset, pad_seq_fn
+
+    print("Training Shakespeare dataset.")
+    data_path = 'data/tinyshakespeare.txt'
+    model_path = 'model/tinygpt_shakespeare_charllm.pt'
+
+    tkz = CharTokenizer()
+    dataset = GPTDataset(tkz, data_path, seq_len=128)
+    collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
+    # train model
+    train(model_path, tkz, collate_fn, dataset)
+
 
 
 if __name__ == '__main__':
