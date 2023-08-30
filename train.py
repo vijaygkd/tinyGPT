@@ -140,9 +140,8 @@ def train_shakespeare():
     model_path = 'model/tinygpt_shakespeare.pt'
 
     tkz = GPT2TokenizerFast.from_pretrained('gpt2')
-    eos_id = 50256
     dataset = GPTDataset(tkz, data_path, seq_len=128)
-    collate_fn=lambda x: pad_seq_fn(x, eos_id)
+    collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
     # train model
     train(model_path, collate_fn, dataset)
 
