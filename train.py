@@ -25,7 +25,7 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
-    num_epochs = 1
+    num_epochs = 5
     batch_size = 32
     seq_len = 128
     lr=0.001    # default=0.001   # TODO - learning rate scheduler
@@ -150,7 +150,7 @@ def train_shakespeare():
 def train_shakespeare_char():
     from dataset import GPTDataset, pad_seq_fn
 
-    print("Training Shakespeare dataset.")
+    print("Training Shakespeare dataset at Character level.")
     data_path = 'data/tinyshakespeare.txt'
     model_path = 'model/tinygpt_shakespeare_charllm.pt'
 
@@ -164,4 +164,5 @@ def train_shakespeare_char():
 
 if __name__ == '__main__':
     # train_codeparrot()
-    train_shakespeare()
+    # train_shakespeare()
+    train_shakespeare_char()

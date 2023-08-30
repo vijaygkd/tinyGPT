@@ -3,7 +3,7 @@ Generate text from GPT language model
 """
 import torch
 from transformers import GPT2TokenizerFast
-from GPT import GPT
+from dataset import CharTokenizer
 
 
 def generate_text(model, tokenizer, context=" ", top_p=0.9, temperature=1, max_len=100, device='cpu'):
@@ -81,9 +81,16 @@ def show(text, color=False):
     
 
 if __name__ == '__main__':
-    context = """import num"""
-    gpt = torch.load('model/tinygpt_shakespeare.pt')
-    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
+    # GPT
+    # context = """import num"""
+    # gpt = torch.load('model/tinygpt_shakespeare.pt')
+    # tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
+
+    # Char GPT
+    context = """God is """
+    gpt = torch.load('model/tinygpt_shakespeare_char.pt')
+    tokenizer = CharTokenizer()
+
     generate_text(gpt, tokenizer, 
                   context, 
                   top_p=0.9,
