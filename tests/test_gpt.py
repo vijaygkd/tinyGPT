@@ -1,51 +1,55 @@
-import torch
 import unittest
+import torch
 from torch import nn
 from GPT import GPT, GPTDecoder
 
 
 class TestGPT(unittest.TestCase):
+    def test_gpt(self):
+        # model
+        model = GPT(n_blocks=2, d_model=512, d_ff=2048, n_heads=8, p_drop=0.1, vocab_size=1000, seq_len=128)
+        # input
+        x = torch.randint(0, 1000, (2, 128))
+        # forward
+        logits, decoder_attns = model(x)
+        # test
+        self.assertEqual(logits.shape, (2, 128, 1000))
+        self.assertEqual(len(decoder_attns), 2)
+        self.assertEqual(decoder_attns[0].shape, (2, 8, 128, 128))
+        self.assertEqual(decoder_attns[1].shape, (2, 8, 128, 128))
+        # check future mask works
+        final_attn = decoder_attns[-1]
+        bottom_zero_out = torch.triu(torch.ones((128, 128)), diagonal=1)    # zero out lower and diagonal elements
+        assert (final_attn * bottom_zero_out).sum() == 0
+    
+    def test_gpt_with_padding_mask_TODO(self):
+        # model
+        model = GPT(n_blocks=2, d_model=512, d_ff=2048, n_heads=8, p_drop=0.1, vocab_size=1000, seq_len=128)
+        # input
+        x = torch.randint(0, 1000, (2, 128))
+        # forward
+        logits, decoder_attns = model(x)
+        # test output with padding mask
+        # TODO 
+        self.assertEqual(logits.shape, (2, 128, 1000))
+        self.assertEqual(len(decoder_attns), 2)
+        self.assertEqual(decoder_attns[0].shape, (2, 8, 128, 128))
+        self.assertEqual(decoder_attns[1].shape, (2, 8, 128, 128))
+        # check future mask works
+        final_attn = decoder_attns[-1]
+        bottom_zero_out = torch.triu(torch.ones((128, 128)), diagonal=1)    # zero out lower and diagonal elements
+        assert (final_attn * bottom_zero_out).sum() == 0
 
-    def setUp(self):
-        self.batch_size = 2
-        self.seq_len = 3
-        self.vocab_size = 10
-        self.n_blocks = 2
-        self.d_model = 4
-        self.d_ff = 16
-        self.n_heads = 2
-        self.p_drop = 0.1
 
-        self.gpt = GPT(
-            n_blocks=self.n_blocks,
-            d_model=self.d_model,
-            d_ff=self.d_ff,
-            n_heads=self.n_heads,
-            p_drop=self.p_drop,
-            vocab_size=self.vocab_size,
-            seq_len=self.seq_len
-        )
-
-    def test_shape_of_output(self):
-        x = torch.zeros((self.batch_size, self.seq_len), dtype=torch.long)
-        mask = torch.zeros((self.batch_size, self.seq_len, self.seq_len), dtype=torch.float)
-        logits, decoder_attns = self.gpt(x, mask)
-
-        self.assertEqual(logits.shape, (self.batch_size, self.seq_len, self.vocab_size))
-        self.assertEqual(len(decoder_attns), self.n_blocks)
-
-    def test_decoder_output_shape(self):
-        decoder = GPTDecoder(self.d_model, self.d_ff, self.n_heads, self.p_drop)
-        x = torch.zeros((self.batch_size, self.seq_len, self.d_model), dtype=torch.float)
-        output, attn_scores = decoder(x)
-
-        self.assertEqual(output.shape, (self.batch_size, self.seq_len, self.d_model))
-        self.assertEqual(attn_scores.shape, (self.batch_size, self.n_heads, self.seq_len, self.seq_len))
-
-    def test_forward(self):
-        x = torch.randint(0, self.vocab_size, (self.batch_size, self.seq_len))
-        mask = torch.zeros((self.batch_size, self.seq_len, self.seq_len))
-        logits, decoder_attns = self.gpt(x, mask)
-
-        self.assertEqual(logits.shape, (self.batch_size, self.seq_len, self.vocab_size))
-        self.assertEqual(len(decoder_attns), self.n_blocks)
+class TestGPTDecoder(unittest.TestCase):
+    def test_gpt_decoder(self):
+        # model
+        model = GPTDecoder(d_model=512, d_ff=2048, n_heads=8, p_drop=0.1)
+        # input
+        x = torch.randn(2, 128, 512)
+        mask = torch.tril(torch.ones((128, 128)))
+        # forward
+        out, attn_scores = model(x, mask)
+        # test
+        self.assertEqual(out.shape, (2, 128, 512))
+        self.assertEqual(attn_scores.shape, (2, 8, 128, 128))

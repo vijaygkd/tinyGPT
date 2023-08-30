@@ -24,7 +24,7 @@ class GPT(nn.Module):
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
         self.position_ids = torch.arange(seq_len, requires_grad=False).to(device)   # position ids: [0,1,2...,n]
         self.emb_dropout = nn.Dropout(p_drop)
-        # future mask
+        # future mask containing 1s below with the diagonal and 0s above
         self.future_mask = torch.tril(torch.ones((seq_len, seq_len), requires_grad=False).to(device))
         # model to gpu
         self.to(device)
@@ -56,7 +56,7 @@ class GPTDecoder(nn.Module):
         self.ff = PositionWiseFeedForward(d_model, d_ff).to(device)
         self.ln_ff = ResidualLayerNorm(d_model, p_drop).to(device)
 
-    def forward(self, x, mask=None):
+    def forward(self, x, mask):
         # x: (batch, seq_len, d_model)
         attn_out, attn_scores = self.mha(x, mask)
         attn_out = self.ln_attn(x, attn_out)

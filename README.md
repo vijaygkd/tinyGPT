@@ -40,6 +40,15 @@ A. Transformer architecture
 ![gtp2 model size](https://jalammar.github.io/images/gpt2/gpt2-sizes-hyperparameters-3.png)
 GPT-2 model sizes! No. of decoder stacks vs no. of parameters
 
+![gpt2 parameter size](https://jalammar.github.io/images/gpt2/gpt2-sizes.png)
+GPT-2 model parameter size
+
 # Refs
+[Illustrated GPT-2](https://jalammar.github.io/illustrated-gpt2/)
+
+[HF NLP course: Training a causual LM](https://huggingface.co/learn/nlp-course/chapter7/6?fw=pt)
+
+
 https://rowlando13.medium.com/everything-gpt-2-4-data-preparation-514cb62f9f3b
+https://kikaben.com/transformers-coding-details/
 
