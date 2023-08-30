@@ -28,7 +28,7 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     num_epochs = 5
     batch_size = 32
     seq_len = 128
-    lr=0.001    # default=0.001   # TODO - learning rate scheduler
+    lr=5e-4    # default=0.001   # TODO - learning rate scheduler
     # ---------------------------------------- #
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
