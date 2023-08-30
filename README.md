@@ -11,6 +11,17 @@ GPT-2 implementation using PyTorch
 - <s>Reuse token embedding layer in the output layer</s>
 - Track training loss - WnB
 
+# Sub Projects
+## Char LLM
+Build char level LLM
+* Char tokenizer - ASCII level
+* Model pre-training
+* Eval - perplexity / loss
+* Model config
+* Data loader
+
+## Fine-tuning
+Fine-tuning a pre-trained model
 
 
 # Architecture
