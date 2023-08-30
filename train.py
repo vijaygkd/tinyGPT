@@ -4,10 +4,11 @@ Train GPT model
 from tqdm import tqdm
 import torch
 from torch import nn
-from GPT import GPT
-from dataset import GPTDataset, pad_seq_fn
 from torch.utils.data import Dataset, DataLoader
 from torchinfo import summary
+from transformers import GPT2TokenizerFast
+from GPT import GPT
+from dataset import GPTDataset, CharTokenizer, pad_seq_fn
 
 
 def train(model_path, collate_fn, dataset_train, dataset_val=None):
@@ -121,22 +122,31 @@ def train(model_path, collate_fn, dataset_train, dataset_val=None):
 
 def train_codeparrot():
     from dataset_hf import get_codeparrot_dataset, prepare_input_labels
+
+    print("Training Codeparrot dataset.")
     model_path = 'model/tinygpt_codeparrot.pt'
     dataset_train = get_codeparrot_dataset(seq_len=128, split='valid')
     # dataset_val = get_codeparrot_dataset(seq_len=128, split='valid')  
     collate_fn = prepare_input_labels
+    # train model
     train(model_path, collate_fn, dataset_train, None)
 
 
 def train_shakespeare():
     from dataset import GPTDataset, pad_seq_fn
+
+    print("Training Shakespeare dataset.")
     data_path = 'data/tinyshakespeare.txt'
     model_path = 'model/tinygpt_shakespeare.pt'
-    dataset = GPTDataset(data_path, seq_len=128)
-    collate_fn=pad_seq_fn
+
+    tkz = GPT2TokenizerFast.from_pretrained('gpt2')
+    eos_id = 50256
+    dataset = GPTDataset(tkz, data_path, seq_len=128)
+    collate_fn=lambda x: pad_seq_fn(x, eos_id)
+    # train model
     train(model_path, collate_fn, dataset)
 
 
 if __name__ == '__main__':
-    train_codeparrot()
-    # train_shakespeare()
+    # train_codeparrot()
+    train_shakespeare()
