@@ -2,6 +2,7 @@
 Train GPT model
 """
 from tqdm import tqdm
+import wandb
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
@@ -11,7 +12,7 @@ from GPT import GPT
 from dataset import GPTDataset, CharTokenizer, pad_seq_fn
 
 
-def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
+def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None, log_wandb=True):
     # ---------------------- #
     # CONSTANTS #
     vocab_size = tokenizer.vocab_size      # GPT2 tokenizer vocab size or char vocab size
@@ -25,11 +26,33 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     p_drop = 0.1
 
     # TRAINING PARAMETERS #
-    num_epochs = 5
+    epochs = 2
     batch_size = 32
     seq_len = 128
     lr=5e-4    # default=0.001   # TODO - learning rate scheduler
+
+    # wandb init
+    if log_wandb:
+        wandb.init(
+            project="tiny-gpt",
+            name=model_path.split('/')[-1],
+            config={
+                "n_blocks": n_blocks,
+                "d_model": d_model,
+                "d_ff": d_ff,
+                "n_heads": n_heads,
+                "p_drop": p_drop,
+                "vocab_size": vocab_size,
+                "seq_len": seq_len,
+                "epochs": epochs,
+                "batch_size": batch_size,
+                "lr": lr,
+                "model_path": model_path,
+            }
+        )
+
     # ---------------------------------------- #
+
 
     device = torch.device('mps' if torch.has_mps else 'cpu')
     device = torch.device('cuda' if torch.has_cuda else device)
@@ -63,8 +86,9 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     # print model summary
     summary(gpt, (batch_size, seq_len), dtypes=[torch.long], depth=3, device=device)
 
-    # torch 2.0 accelerator
-    # gpt = torch.compile(gpt)
+    # torch 2.0 accelerator -> only works with CUDA
+    if torch.cuda.is_available():
+        gpt = torch.compile(gpt)
 
     # Define the loss function
     criterion = nn.CrossEntropyLoss()
@@ -73,7 +97,7 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
     
     print("Starting training.")
     # train
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
         gpt.train()
 
         running_loss = 0.0
@@ -93,6 +117,7 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
                 
                 # Compute the loss
                 loss = criterion(logits, targets)
+                perplexity = torch.exp(loss)
 
                 # Backward pass
                 loss.backward()
@@ -101,23 +126,28 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None):
                 optimizer.step()
 
                 # print statistics
-                pbar.set_postfix(loss=loss.item())
+                pbar.set_postfix(loss=loss.item(), perplexity=perplexity.item())
                 pbar.update()
 
-                running_loss += loss.item()
-                if i % 10 == 9:    # print every 10 mini-batches
-                    # print(f'Epoch {epoch}, batch {i+1}: loss = {running_loss / 10:.4f}')
-                    # Update the tqdm progress bar with the current loss value
-                    # pbar.set_postfix(loss=f'{running_loss / 10:.4f}')
-                    running_loss = 0.0
-                
+                # wandb
+                wandb.log({"loss": loss.item(), "perplexity": perplexity.item()})
+
+                # running_loss += loss.item()
+                # running_ppx += perplexity.item()
+                # if i % 10 == 9:    # print every 10 mini-batches
+                #     # print(f'Epoch {epoch}, batch {i+1}: loss = {running_loss / 10:.4f}')
+                #     # Update the tqdm progress bar with the current loss value
+                #     # pbar.set_postfix(loss=f'{running_loss / 10:.4f}')
+                #     running_loss = 0.0
+                #     running_ppx = 0.0
                 # TODO - run eval on validation data
 
-        # Print the loss for this epoch
-        print("Epoch [{}/{}], Loss: {:.4f}".format(epoch+1, num_epochs, loss.item()))
+        # Print the loss and perplexity for this epoch
+        print("Epoch %d: Loss = %.4f, Perplexity = %.4f" % (epoch, loss.item(), perplexity.item()))
 
     # save model
     torch.save(gpt, model_path)
+    wandb.finish()
 
 
 def train_codeparrot():
