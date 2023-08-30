@@ -3,12 +3,12 @@ GPT-2 implementation using PyTorch
 
 
 # TODO
-- Pad token masking
 - <s>Inference - generating tokens</s>
+- <s>Reuse token embedding layer in the output layer</s>
+- Pad token masking
 - Update unit tests
 - how to process text data? <bos>,<eos>,<pad>. How to split text file?
 - Better data handling? Train on larger dataset.
-- <s>Reuse token embedding layer in the output layer</s>
 - Track training loss - WnB
 
 # Sub Projects

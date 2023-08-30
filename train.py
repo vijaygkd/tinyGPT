@@ -152,7 +152,7 @@ def train_shakespeare_char():
 
     print("Training Shakespeare dataset at Character level.")
     data_path = 'data/tinyshakespeare.txt'
-    model_path = 'model/tinygpt_shakespeare_charllm.pt'
+    model_path = 'model/tinygpt_shakespeare_char.pt'
 
     tkz = CharTokenizer()
     dataset = GPTDataset(tkz, data_path, seq_len=128)

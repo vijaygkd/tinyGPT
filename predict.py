@@ -10,7 +10,7 @@ def generate_text(model, tokenizer, context=" ", top_p=0.9, temperature=1, max_l
     seq_len = model.seq_len
 
     show(context, color=False)
-    # inference
+    # inference -> turn off dropout
     model.eval()
     for i in range(max_len):
         # (seq_len)
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # Char GPT
     context = """God is """
-    gpt = torch.load('model/tinygpt_shakespeare_char.pt')
+    gpt = torch.load('model/tinygpt_shakespeare_charllm.pt')
     tokenizer = CharTokenizer()
 
     generate_text(gpt, tokenizer, 

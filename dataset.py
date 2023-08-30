@@ -70,7 +70,7 @@ class CharTokenizer():
         self.vocab_size = 128
 
     def tokenize(self, text):
-        tokens = [self.eos_token] + list(text) + [self.eos_token]
+        tokens = list(text)
         return tokens
 
     def convert_tokens_to_ids(self, tokens):
