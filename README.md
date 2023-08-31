@@ -1,6 +1,8 @@
 # tinyGPT
 GPT-2 implementation using PyTorch
 
+📉 [Tiny-GPT wandb project](https://wandb.ai/vijaygkd/tiny-gpt)
+
 
 # TODO
 - <s>Inference - generating tokens</s>
