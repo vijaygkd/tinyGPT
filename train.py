@@ -14,22 +14,21 @@ from dataset import GPTDataset, CharTokenizer, pad_seq_fn
 
 def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None, log_wandb=True):
     # ---------------------- #
-    # CONSTANTS #
-    vocab_size = tokenizer.vocab_size      # GPT2 tokenizer vocab size or char vocab size
-
     # MODEL PARAMETERS #
     # GPT-2 small parameters
     n_blocks = 12     #12
-    d_model = 768    #768
+    d_model = 512    #768
     d_ff = d_model * 4
-    n_heads = 12      #12
-    p_drop = 0.1
+    n_heads = 8      #12
+    p_drop = 0.1      #0.1
+    seq_len = dataset_train.seq_len
+    vocab_size = tokenizer.vocab_size      # GPT2 tokenizer vocab size or char vocab size
 
     # TRAINING PARAMETERS #
-    epochs = 2
+    epochs = 20
     batch_size = 32
-    seq_len = 128
-    lr=5e-4    # default=0.001   # TODO - learning rate scheduler
+    lr = 5e-6       # transformers converge at low learning rates. At higher learning rate > 1e-4 loss doesn't drop. 
+    # TODO - learning rate scheduler
 
     # wandb init
     if log_wandb:
@@ -100,7 +99,6 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None, lo
     for epoch in range(epochs):
         gpt.train()
 
-        running_loss = 0.0
         with tqdm(total=num_batches, desc=f'Epoch {epoch}', unit='batch') as pbar:
             # for i, data in enumerate(tqdm(dataloader, desc=f'Epoch {epoch}', unit='batch')):
             for i, data in enumerate(dataloader_train):
@@ -142,9 +140,6 @@ def train(model_path, tokenizer, collate_fn, dataset_train, dataset_val=None, lo
                 #     running_ppx = 0.0
                 # TODO - run eval on validation data
 
-        # Print the loss and perplexity for this epoch
-        print("Epoch %d: Loss = %.4f, Perplexity = %.4f" % (epoch, loss.item(), perplexity.item()))
-
     # save model
     torch.save(gpt, model_path)
     wandb.finish()
@@ -168,10 +163,10 @@ def train_shakespeare():
 
     print("Training Shakespeare dataset.")
     data_path = 'data/tinyshakespeare.txt'
-    model_path = 'model/tinygpt_shakespeare.pt'
+    model_path = 'model/tinygpt_shakespeare_bpe_small.pt'
 
     tkz = GPT2TokenizerFast.from_pretrained('gpt2')
-    dataset = GPTDataset(tkz, data_path, seq_len=128)
+    dataset = GPTDataset(tkz, data_path, seq_len=256)
     collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
     # train model
     train(model_path, tkz, collate_fn, dataset)
@@ -182,10 +177,24 @@ def train_shakespeare_char():
 
     print("Training Shakespeare dataset at Character level.")
     data_path = 'data/tinyshakespeare.txt'
-    model_path = 'model/tinygpt_shakespeare_char.pt'
+    model_path = 'model/tinygpt_shakespeare_char_small_model_lowlr.pt'
 
     tkz = CharTokenizer()
-    dataset = GPTDataset(tkz, data_path, seq_len=128)
+    dataset = GPTDataset(tkz, data_path, seq_len=512)
+    collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
+    # train model
+    train(model_path, tkz, collate_fn, dataset)
+
+
+def train_federer_char():
+    from dataset import GPTDataset, pad_seq_fn
+
+    print("Training Federer dataset at Character level.")
+    data_path = 'data/rogerfederer.txt'
+    model_path = 'model/tinygpt_federer_char_small_model.pt'
+
+    tkz = CharTokenizer()
+    dataset = GPTDataset(tkz, data_path, seq_len=512)
     collate_fn=lambda x: pad_seq_fn(x, tkz.eos_token_id)
     # train model
     train(model_path, tkz, collate_fn, dataset)
@@ -196,3 +205,4 @@ if __name__ == '__main__':
     # train_codeparrot()
     # train_shakespeare()
     train_shakespeare_char()
+    # train_federer_char()
