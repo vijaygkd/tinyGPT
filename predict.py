@@ -28,8 +28,11 @@ def generate_text(model, tokenizer, context=" ", top_p=0.9, temperature=1, max_l
         logits, attn = model(input)                             # logit: (1, seq_len, vocab)
         logits = logits.squeeze()                               # (seq_len, vocab)
         token_logits = logits[output_token_idx]                   # (vocab)
+        
         # sample token
         next_token = nucleus_sampling(token_logits, top_p, temperature)
+        # next_token = greedy_sampling(token_logits)
+
         pred_word = tokenizer.decode(next_token)
         show(pred_word, color=True)
         # auto-regressive generation
@@ -68,7 +71,7 @@ def top_p_sampling(probabilities, top_p):
 def greedy_sampling(logits):
     # greedy sampling -> leads to repeatition
     pred_token = torch.argmax(logits, dim=-1)    # (seq_len) 
-    return pred_token
+    return torch.tensor([pred_token])
 
 
 def show(text, color=False):
@@ -87,13 +90,13 @@ if __name__ == '__main__':
     # tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
 
     # Char GPT
-    context = """God is """
-    gpt = torch.load('model/tinygpt_shakespeare_charllm.pt')
+    context = """Title: Roger Federer"""
+    gpt = torch.load('model/tinygpt_federer_char_small_model.pt')
     tokenizer = CharTokenizer()
 
     generate_text(gpt, tokenizer, 
                   context, 
-                  top_p=0.9,
-                  temperature=1, 
-                  max_len=500,
+                  top_p=0.95,
+                  temperature=.5, 
+                  max_len=2000,
                   device='mps')
