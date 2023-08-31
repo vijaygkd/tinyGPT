@@ -17,6 +17,7 @@ dependencies = [
     "torchinfo>=1.7.2",
     "datasets>=2.11.0",
     "torch>=2.0.0",
+    "wandb>=0.15.9",
 ]
 requires-python = ">=3.10"
 license = {text = "MIT"}

@@ -19,7 +19,8 @@ class GPT(nn.Module):
             decoder_blocks.append(decoder)
         self.decoder_stack = nn.ModuleList(decoder_blocks)
         # shared weights: token embeddings & decoder output
-        self.token_embedding = SharedEmbeddingLayer(vocab_size, d_model)
+        self.token_embedding = nn.Embedding(vocab_size, d_model)    #SharedEmbeddingLayer(vocab_size, d_model)
+        self.decode_embedding = nn.Linear(d_model, vocab_size)       # SharedEmbeddingLayer(vocab_size, d_model)
         # TODO - positional embedding logic
         self.positional_embedding = nn.Embedding(seq_len, d_model)   # learned embedding
         self.position_ids = torch.arange(seq_len, requires_grad=False).to(device)   # position ids: [0,1,2...,n]
@@ -44,7 +45,9 @@ class GPT(nn.Module):
             dec_out, attn = decoder(dec_out, self.future_mask)      # dec_out: (batch, seq_len, d_model)
             decoder_attns.append(attn)                              # attn: (batch, n_heads, seq_len, seq_len)
         # output
-        logits = self.token_embedding(dec_out, mode='linear')       # (batch, seq_len, vocab_size)
+        # logits = self.decode_embedding(dec_out, mode='linear')       # (batch, seq_len, vocab_size)
+        # logits = dec_out @ self.token_embedding.weight.T              # share embedding and output layer
+        logits = self.decode_embedding(dec_out)                        # (batch, seq_len, vocab_size)
         return logits, decoder_attns
 
 

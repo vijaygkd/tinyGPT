@@ -1,16 +1,40 @@
 # tinyGPT
 GPT-2 implementation using PyTorch
 
+📉 [Tiny-GPT wandb project](https://wandb.ai/vijaygkd/tiny-gpt)
+
 
 # TODO
-- Pad token masking
 - <s>Inference - generating tokens</s>
+- <s>Reuse token embedding layer in the output layer</s> Need to test if this does help or not.
+- <s>Track training loss - WnB</s>
+- Pad token masking. Currently the way data is prepared for training, there is no padding.
 - Update unit tests
-- how to process text data? <bos>,<eos>,<pad>. How to split text file?
-- Better data handling? Train on larger dataset.
-- <s>Reuse token embedding layer in the output layer</s>
-- Track training loss - WnB
+- how to prepare data for pre-training? 
+    - How to split text into sequence lengths and batches? Is it done randomly?
+    - How are `<bos>,<eos>,<pad>` tokens used?
+    - How are larger datasets combined?
 
+## Pre-training models
+How to use pre-trained open source models like Llama-2?
+
+## Fine-tuning
+Fine-tuning a pre-trained model.
+* Finetune on custom dataset
+* Try Instruct-finetuning
+* Alpaca instruct-finetuning datasets
+* How many epochs to fine-tune? Usualy its 1-2 epochs.
+
+
+# Notes
+## Learning rate
+
+Transformers are sensitive to optimizer learning rate. It is one of most important hyper-parameter in training transformers.
+
+* The transformer models converge at lower learning rates: **`lr < 1e-5`**. When transformer model is converging, the loss continously keeps dropping and can get very close to zero.
+* At higher lr, loss doesn't drop and stagnates indicating the model is not learning.
+* Models converge on smaller dataset like (data/rogerfederer.txt) at `5e-5`. Loss drops to almost `0` and the dataset is memorized by the model.
+* TODO - The model training could benefit from learning rate schedulers often used in literature.
 
 
 # Architecture
@@ -35,6 +59,17 @@ A. Transformer architecture
 2. Masking
     - padding mask
     - subsequent mask
+
+## Training
+### GPT
+Use configs from GPT paper.
+* Byte pair encoding
+
+### Char LLM
+Build char level LLM
+* Char tokenizer - ASCII level
+* Model pre-training
+
 
 ## Model Size
 ![gtp2 model size](https://jalammar.github.io/images/gpt2/gpt2-sizes-hyperparameters-3.png)

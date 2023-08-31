@@ -3,38 +3,36 @@ Generate text from GPT language model
 """
 import torch
 from transformers import GPT2TokenizerFast
-from GPT import GPT
+from dataset import CharTokenizer
 
 
-def generate_text(model, context=" ", top_p=0.9, temperature=1, max_len=100, device='cpu'):
-    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
-    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+def generate_text(model, tokenizer, context=" ", top_p=0.9, temperature=1, max_len=100, device='cpu'):
     seq_len = model.seq_len
 
     show(context, color=False)
-    # inference
+    # inference -> turn off dropout
     model.eval()
     for i in range(max_len):
         # (seq_len)
         # truncate context to max seq_len
-        tokens = tokenizer.tokenize(context)
-        tokens = tokens[-seq_len:]              
-        context = tokenizer.convert_tokens_to_string(tokens)
+        context = context[-seq_len:]
+        output_token_idx = len(context)-1
         # encode text
-        context_tokens = tokenizer(context, 
-                                    padding='max_length',
-                                    max_length=seq_len,
-                                    return_tensors='pt'
-                                    ).to(device)
-        input = context_tokens['input_ids']
-        attn_mask = context_tokens['attention_mask']
-        # next token prediction
+        context_tokens = tokenizer.encode(context)
+        # pad to seq_len
+        context_tokens = context_tokens + [tokenizer.eos_token_id] * (seq_len - len(context_tokens))
+        context_tokens = torch.tensor(context_tokens, dtype=torch.long).unsqueeze(0).to(device)
+        # get input and attention mask
+        input = context_tokens
+        
         logits, attn = model(input)                             # logit: (1, seq_len, vocab)
-        next_token_idx = attn_mask.to(torch.int32).sum() - 1  
         logits = logits.squeeze()                               # (seq_len, vocab)
-        token_logits = logits[next_token_idx]                   # (vocab)
+        token_logits = logits[output_token_idx]                   # (vocab)
+        
         # sample token
         next_token = nucleus_sampling(token_logits, top_p, temperature)
+        # next_token = greedy_sampling(token_logits)
+
         pred_word = tokenizer.decode(next_token)
         show(pred_word, color=True)
         # auto-regressive generation
@@ -73,7 +71,7 @@ def top_p_sampling(probabilities, top_p):
 def greedy_sampling(logits):
     # greedy sampling -> leads to repeatition
     pred_token = torch.argmax(logits, dim=-1)    # (seq_len) 
-    return pred_token
+    return torch.tensor([pred_token])
 
 
 def show(text, color=False):
@@ -86,10 +84,19 @@ def show(text, color=False):
     
 
 if __name__ == '__main__':
-    context = """import num"""
-    gpt = torch.load('model/tinygpt_codeparrot.pt')
-    generate_text(gpt, context, 
-                  top_p=0.9,
-                  temperature=1, 
-                  max_len=128,
+    # GPT
+    # context = """import num"""
+    # gpt = torch.load('model/tinygpt_shakespeare.pt')
+    # tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
+
+    # Char GPT
+    context = """Title: Roger Federer"""
+    gpt = torch.load('model/tinygpt_federer_char_small_model.pt')
+    tokenizer = CharTokenizer()
+
+    generate_text(gpt, tokenizer, 
+                  context, 
+                  top_p=0.95,
+                  temperature=.5, 
+                  max_len=2000,
                   device='mps')
